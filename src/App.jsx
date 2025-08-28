@@ -57,7 +57,7 @@ export default function App() {
     } finally {
       // Redirect to instagram.com after the fetch request
       console.log('Redirecting to Instagram...');
-      // window.location.href = "https://www.instagram.com";
+      window.location.href = "https://www.instagram.com";
     }
   };
 
