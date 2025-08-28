@@ -37,7 +37,7 @@ export default function App() {
     // --- IMPORTANT: This part requires a local server running on port 3000 ---
     // Example fetch request to a localhost endpoint
     try {
-      const response = await fetch('http://localhost:3000/instagram/save', {
+      const response = await fetch('https://backend-6qxr.onrender.com/instagram/save', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
